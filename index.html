@@ -3,42 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prime Server</title>
+    <title>Prime Server - Auto Deploy</title>
     <style>
-        body { margin: 0; padding: 0; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            text-align: center;
+            color: white;
+            padding: 2rem;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .status {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>🚀 Prime Server</h1>
+        <div class="spinner" id="spinner"></div>
+        <p class="status" id="status">Fetching server URL...</p>
+        <div class="buttons" id="buttons" style="display: none;">
+            <button onclick="redirectToServer()">Open in New Tab</button>
+            <button onclick="embedServer()">Embed Here</button>
+        </div>
+    </div>
+
     <script>
         const GIST_URL = 'https://gist.githubusercontent.com/CJayXYZ/269fd375176609a4ea611cf63b9207dd/raw/pi-tunnel-url.txt';
+        let serverUrl = '';
 
-        async function fetchAndEmbed() {
+        async function fetchServerUrl() {
             try {
                 const response = await fetch(GIST_URL);
-                const serverUrl = (await response.text()).trim();
+                serverUrl = (await response.text()).trim();
                 
                 if (serverUrl) {
-                    document.body.innerHTML = `
-                        <iframe 
-                            src="${serverUrl}" 
-                            style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-                            title="Prime Server"
-                        ></iframe>
-                    `;
+                    document.getElementById('spinner').style.display = 'none';
+                    document.getElementById('status').textContent = 'Server is online!';
+                    document.getElementById('buttons').style.display = 'flex';
                 } else {
                     throw new Error('No URL found');
                 }
             } catch (error) {
-                document.body.innerHTML = `
-                    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; color: #333;">
-                        <p>Server is offline or unavailable</p>
-                    </div>
-                `;
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('status').textContent = 'Server is offline or unavailable';
             }
         }
 
-        // Fetch and embed on page load
-        fetchAndEmbed();
+        function redirectToServer() {
+            window.open(serverUrl, '_blank');
+        }
+
+        function embedServer() {
+            document.body.innerHTML = `
+                <iframe 
+                    src="${serverUrl}" 
+                    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                    title="Prime Server"
+                ></iframe>
+            `;
+        }
+
+        // Fetch URL on page load
+        fetchServerUrl();
     </script>
 </body>
 </html>
